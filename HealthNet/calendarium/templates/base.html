@@ -1,0 +1,17 @@
+{% extends "core/landing/baselanding.html" %}
+
+{% load staticfiles %}
+
+{% block title %}Calendar{% endblock title %}
+
+{% block scriptheader %}
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">-->
+    <link rel="stylesheet" href="{% static "calendarium/css/calendar.css" %}">
+{% endblock scriptheader %}
+
+{% block pageContents %}
+
+    {% block main %}{% endblock %}
+
+{% endblock%}

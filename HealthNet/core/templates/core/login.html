@@ -1,0 +1,20 @@
+{% extends 'core/main/base.html' %}
+
+{% block title %}Login Page{% endblock %}
+
+{% block mainbody %}
+    {% if login_failure %}
+        <h2 style="color: red">Invalid Login; Try again.</h2>
+    {% else %}
+        <h2>Login</h2>
+    {% endif %}
+  <form id="login_form" method="post" action="{% url 'login' %}">
+      {% csrf_token %}
+      Username: <input type="text" name="username" value="" size="50" />
+      <br />
+      Password: <input type="password" name="password" value="" size="50" />
+      <br />
+      <input type="hidden" name="csrfmiddlewaretoken" value="pHK2CZzBB323BM2Nq7DE2sxnQoBG1jPl" disabled="">
+      <input type="submit" value="Login" />
+  </form>
+{% endblock %}

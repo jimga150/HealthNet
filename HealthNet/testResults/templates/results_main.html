@@ -1,0 +1,67 @@
+{% extends "core/landing/baselanding.html" %}
+
+{% load userGroup %}
+
+{% block title %}Test Results{% endblock title %}
+
+{% block pageContents %}
+    {% if request.user|in_group:"Doctor" %}
+            <p><a href="{% url 'results_create' %}"> Create Test</a></body></p>
+            <h2><p>Test Results Pending</p></h2>
+            {% for result in results %}
+
+            <div class="row top_buffer">
+                 <div class="col-md-1">
+                 </div>
+                 <div class="col-md-10">
+
+                        <h2>Test Results</h2>
+
+                        <p>Doctor: {{ result.doctor }}</p>
+                        <p>Patient: {{ result.patient }}</p>
+                        <p>Date: {{ result.date }}</p>
+                        <p>Name: {{ result.name }}</p>
+                        <img src={{ result.files.url }}>
+                        <p>Notes: {{ result.notes }}</p>
+                        <p>Released: {{ result.released }}</p>
+                        <a href="{% url 'results_delete' result.id %}" class="btn btn-sm btn-danger">Delete</a>
+                        <a href="{% url 'results_edit' result.id %}" class="btn btn-sm btn-danger">Release</a>
+
+                        </div>
+                 <div class="col-md-1">
+                 </div>
+            </div>
+
+            {% endfor%}
+        {% elif request.user|in_group:"Patient"%}
+
+            <h2><p>Test Results Pending</p></h2>
+            {% for result in results %}
+                {% if request.user == result.patient.user %}
+                {% if result.released %}
+
+                <div class="row top_buffer">
+                 <div class="col-md-1">
+                 </div>
+                 <div class="col-md-10">
+
+                    <h2>Test Results</h2>
+
+                    <p>Doctor: {{ result.doctor }}</p>
+                    <p>Patient: {{ result.patient }}</p>
+                    <p>Date: {{ result.date }}</p>
+                    <p>Name: {{ result.name }}</p>
+                    <img src={{ result.files.url }}>
+                    <p>Notes: {{ result.notes }}</p>
+                    <a href="{% url 'results_delete' result.id %}" class="btn btn-sm btn-danger">Delete</a>
+
+
+                     </div>
+                 <div class="col-md-1">
+                 </div>
+            </div>
+                {% endif %}
+            {% endif %}
+            {% endfor%}
+        {% endif %}
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "core/landing/baselanding.html" %}
+
+{% block title %}Edit Test Result{% endblock title %}
+
+{% block pageContents %}
+
+    <form enctype="multipart/form-data" action="" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Save"/>
+    </form>
+
+{% endblock pageContents %}

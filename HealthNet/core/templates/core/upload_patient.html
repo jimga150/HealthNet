@@ -1,0 +1,12 @@
+{% extends "core/landing/baselanding.html" %}
+
+{% block pageContents %}
+    <h4>This page assumes that the patient has already created an account using the same email as the one in your export
+        file.</h4>
+    <form id="upload_file" method="post" action="{% url 'upload patient' %}" enctype=multipart/form-data>
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" name="upload" value="Upload"/>
+    </form>
+
+{% endblock pageContents %}

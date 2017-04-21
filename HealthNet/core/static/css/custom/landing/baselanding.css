@@ -1,0 +1,11 @@
+.col-md-10 {
+    background-color: #f5f3f3;
+    border-radius: 15px;
+}
+.top_buffer {
+    margin-top: 20px;
+}
+
+.nav_buffer {
+    padding-top: 70px;
+}

@@ -1,0 +1,29 @@
+{% extends parent %}
+
+
+{% block pageContents %}
+
+    {% if registered %}
+
+        <h1 class="text-center">Appointment Created</h1>
+
+    {% else %}
+
+        {% if already_exists %}
+
+            <h1>Doctor is booked</h1>
+
+
+        {% endif %}
+
+        <div class="container center-block">
+            <form id="user_form" method="post" action="{% url 'appointment_create' %}"
+                  enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ appointment_form.as_p }}
+                <input type="hidden" name="csrfmiddlewaretoken" value="pHK2CZzBB323BM2Nq7DE2sxnQoBG1jPl" disabled="">
+                <input type="submit" name="submit" value="Register"/>
+            </form>
+        </div>
+    {% endif %}
+{% endblock %}

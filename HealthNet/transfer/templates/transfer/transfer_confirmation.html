@@ -1,0 +1,12 @@
+{% extends 'core/landing/baselanding.html' %}
+
+{% block title %}Transfer Confirmation Page{% endblock title %}
+
+{% block pageContents %}
+
+
+    <h2>You've completed the transfer.</h2>
+
+     <a href="{% url 'transfer_landing' %}" class="btn btn-primary">Transfer Again</a>
+
+{% endblock pageContents %}

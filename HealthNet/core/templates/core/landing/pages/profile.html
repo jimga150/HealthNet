@@ -1,0 +1,94 @@
+{% extends parent %}
+{% load userGroup %}
+
+
+{% block title %}Patient Profile{% endblock %}
+
+{% block pageContents %}
+
+<div class="row">
+        <div class="col-md-1">
+        </div>
+        <div class="col-md-10">
+            <h1>
+               User : {{ request.user.get_full_name}}
+            </h1>
+
+            {% if request.user|in_group:"Patient" %}
+                <h2>
+                    Email : {{ request.user.email }}
+                </h2>
+                <h2>
+                    Birthday : {{ request.user.patient.birthday }}
+                </h2>
+                <h2>
+                    Gender : {{ request.user.patient.get_sex_display }}
+                </h2>
+                <h2>
+                    Blood Type : {{ request.user.patient.get_blood_type_display }}
+                </h2>
+                <h2>
+                    Height : {{ request.user.patient.height }}
+                </h2>
+                <h2>
+                    Weight : {{ request.user.patient.weight }}
+                </h2>
+                <h2>
+                    Allergies : {{ request.user.patient.allergies }}
+                </h2>
+                <h2>
+                    Insurance Info : {{ request.user.patient.insurance_info }}
+                </h2>
+                <h2>
+                    Preferred Hospital : {{ request.user.patient.preferred_hospital }}
+                </h2>
+                <h2>
+                    Emergency Contact : {{ request.user.patient.emergency_contact }}
+                </h2>
+
+                <div class="text-center">
+                    <a href="{% url 'update' %}" class="btn btn-info" role="button">Edit Profile</a>
+                    <a href="javascript:privacywarning();" class="btn btn-info" role="button">Email myself this info</a>
+                    <a href="{% url 'download' %}" class="btn btn-info" role="button">Download this info</a>
+                </div>
+            {% elif request.user|in_group:"Nurse" %}
+
+                <h2>
+                    Hospital : {{ request.user.nurse.hospital }}
+                </h2>
+                <h2>
+                    Phone Number : {{ request.user.nurse.phoneNum }}
+                </h2>
+
+            {% elif request.user|in_group:"Doctor" %}
+                <h2>
+                    Phone Number : {{ request.user.doctor.phoneNum }}
+                </h2>
+
+            {% elif request.user|in_group:"Admin" %}
+                <h2>
+                    Placeholder, no relevant info to edit for Admins.
+                </h2>
+            {% else %}
+
+                <h2 style="color: #921e12">
+                    No User found. <!--Added by Jim on 4/4/17 for testing-->
+                </h2>
+
+            {% endif %}
+
+        </div>
+        <div class="col-md-1">
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        function privacywarning() {
+            var answer = confirm ("This sends your Medical Information to you in plain text. If someone else intercepts"
+                + " this, they could view your sensitive information. Proceed?");
+            if (answer)
+                window.location="{% url 'email_info' %}";
+            }
+    </script>
+
+{% endblock %}

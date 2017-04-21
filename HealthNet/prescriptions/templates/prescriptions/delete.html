@@ -1,0 +1,30 @@
+{% extends 'core/landing/baselanding.html' %}
+
+{% block title %}Delete Prescription{% endblock title %}
+
+{% block pageContents %}
+
+    {% if Prescription %}
+        <h1>Prescription:</h1>
+        <ul>
+            <li>Prescribed by: {{ Prescription.doctor }}</li>
+            <li>{{ Prescription }}</li>
+            <li>Date Prescribed: {{ Prescription.date_prescribed }}</li>
+        </ul>
+        <p>Are you sure you want to delete this?</p>
+        <div id ="Buttons" style = "float:left; height: 50px">
+            <div id ="left" style = "float:left; width: 40%;">
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Yes</button>
+                </form>
+            </div>
+            <div id ="center" style = "float:left; width: 20%;">
+            </div>
+            <div id ="right" style = "float:right; width: 40%;">
+                <a href="{% url 'list prescriptions for patient' patient_id%}" class="btn btn-primary">No</a>
+            </div>
+        </div>
+    {% endif %}
+
+{% endblock pageContents %}

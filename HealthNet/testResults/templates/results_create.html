@@ -1,0 +1,13 @@
+{% extends "core/landing/baselanding.html" %}
+
+{% block title %}Create Test Result{% endblock title %}
+
+{% block pageContents %}
+
+    <form id="user_form" method="post" action="{% url 'results_create' %}"enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ results_form.as_p }}
+        <input type="submit" name="submit" value="Create"/>
+    </form>
+
+{% endblock pageContents %}

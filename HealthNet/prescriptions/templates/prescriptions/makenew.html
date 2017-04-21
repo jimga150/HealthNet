@@ -1,0 +1,14 @@
+{% extends 'core/landing/baselanding.html' %}
+
+{% block title %}New Prescription{% endblock title %}
+
+{% block pageContents %}
+
+    <form id="user_form" method="post" action="{% url 'new prescription' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ prescription_form.as_p }}
+        <input type="submit" name="submit_singular" value="Prescribe"/>
+        <input type="submit" name="submit_another" value="Prescribe and fill out another"/>
+    </form>
+
+{% endblock pageContents %}

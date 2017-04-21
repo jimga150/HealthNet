@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% load userGroup %}
+
+{% block main %}
+<h1>{{ object }}</h1>
+<table>
+    <tr>
+        <th>{% trans "Start" %}</th>
+        <td>{{ object.start }}</td>
+    </tr>
+    <tr>
+        <th>{% trans "End" %}</th>
+        <td>{{ object.end }}</td>
+    </tr>
+    <tr>
+        <th>{% trans "Category" %}</th>
+        <td>{{ object.category }}</td>
+    </tr>
+    <tr>
+        <th>{% trans "Description" %}</th>
+        <td>{{ object.description }}</td>
+    </tr>
+    <tr>
+        <th>{% trans "Patient" %}</th>
+        <td>{{ object.created_by }}</td>
+    </tr>
+</table>
+<a href="{% url "calendar_current_month" %}">{% trans "Back" %}</a>
+    <a href="{% url "calendar_event_update" pk=object.pk %}">{% trans "Edit" %}</a>
+{% if request.user|in_group:"Patient" or request.user|in_group:"Doctor" %}
+    <a href="{% url "calendar_event_delete" pk=object.pk %}">{% trans "Delete" %}</a>
+{% endif %}
+{% endblock %}

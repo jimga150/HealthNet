@@ -1,0 +1,34 @@
+{% extends "core/landing/baselanding.html" %}
+
+
+{% block title %}Inbox{% endblock title %}
+
+
+{% block pageContents %}
+
+    <ul><a href="{% url 'messages_create' %}">Create Message</a></ul>
+    <ul>Messages appear here:</ul>
+    {% for message in messages %}
+
+     <div class="row top_buffer">
+            <div class="col-md-1">
+            </div>
+            <div class="col-md-10">
+                <h2>Message</h2>
+
+                <p>Recipient: {{ message.recipient }}</p>
+                <p>Date: {{ message.date }}</p>
+                <p>Subject: {{ message.subject }}</p>
+                <p>Message: {{ message.text }}</p>
+                <a href="{% url 'messages_delete' message.id %}" class="btn btn-sm btn-danger">Delete</a>
+
+
+                </div>
+
+            <div class="col-md-1">
+            </div>
+        </div>
+
+    {% endfor %}
+
+{% endblock%}

@@ -1,0 +1,46 @@
+{% extends parent %}
+
+{% load userGroup %}
+
+
+
+{% block pageContents %}
+
+    <div>
+
+        <a href="{% url 'appointment_create' %}" class="btn btn-info" role="button">Create Appointment</a>
+
+    </div>
+
+    {% for appointment in appointments %}
+        <div class="row top_buffer">
+            <div class="col-md-1">
+            </div>
+            <div class="col-md-10">
+                <h2>
+                    Appointment
+                </h2>
+                <p>Patient : {{ appointment.patient.user.get_full_name }}</p>
+                <p>Doctor : {{ appointment.doctor }}</p>
+                <p>Hospital : {{ appointment.hospital }}</p>
+                <p>Notes : {{ appointment.appointmentNotes }}</p>
+                <p>Time : {{ appointment.appointmentStart }}</p>
+                <div>
+                    <a href="{% url 'appointment_edit' appointment.id %}" class="btn btn-sm btn-warning">Edit</a>
+                    {% if request.user|in_group:"Patient" or request.user|in_group:"Doctor" %}
+                        <a href="{% url 'delete' appointment.id %}" class="btn btn-sm btn-danger">Delete</a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-md-1">
+            </div>
+        </div>
+
+
+
+
+    {% endfor %}
+
+
+{% endblock %}

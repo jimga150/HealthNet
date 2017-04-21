@@ -1,0 +1,151 @@
+
+{% load staticfiles %}
+
+{% load userGroup %}
+
+<html>
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom/landing/baselanding.css' %}">
+
+    <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
+
+    {% block scriptheader %}{% endblock %}
+
+     <title>{% block title %}Landing{% endblock title %}</title>
+
+    {% block header %}{% endblock header %}
+
+</head>
+<body>
+
+
+<div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+                    <div class="navbar-header">
+
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                             <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+                        </button> <a class="navbar-brand" href="{% block homePage %}{% url 'landing' %}{% endblock %}">HealthNet</a>
+                    </div>
+
+                    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+
+                        <ul class="nav navbar-nav navbar-right container-fluid">
+
+                            <li><a href="{% url 'profile' %}">Update Profile Info</a></li>
+                            {% if request.user|in_group:"Patient" %}
+                                <!--<li><a href="{% url 'appointment_home' %}">Appointments</a></li>-->
+                                <li><a href="{% url 'prescriptions' %}">View Prescriptions</a></li>
+                                <li><a href="{% url 'results_home' %}">Test Results</a></li>
+                                <li><a href="{% url 'calendar_current_month' %}">Calendar</a></li>
+                            {% elif request.user|in_group:"Doctor" %}
+                                <!--<li><a href="{% url 'appointment_home' %}">Appointments</a></li>-->
+                                <li><a href="{% url 'prescriptions' %}">Add or remove Prescriptions</a></li>
+                                <li><a href="{% url 'view patients' %}">View Patients</a></li>
+                                <li><a href="{% url 'results_home' %}">Release Test Results</a></li>
+                                <li><a href="{% url 'calendar_current_month' %}">Calendar</a></li>
+                            {% elif request.user|in_group:"Nurse" %}
+                                <!--<li><a href="{% url 'appointment_home' %}">Appointments</a></li>-->
+                                <li><a href="{% url 'view patients' %}">View Patients</a></li>
+                                <li><a href="{% url 'calendar_current_month' %}">Calendar</a></li>
+                            {% elif request.user|in_group:"Admin" %}
+                                <li><a href="{% url 'staffregister' %}">Add Employee</a></li>
+                                <li><a href="{% url 'transfer_landing' %}">Transfer Patient</a></li>
+                                <li><a href="{% url 'logs' %}">View System Logs</a></li>
+                                <li><a href="{% url 'statistics' %}">View System Stats</a></li>
+                            {% endif %}
+
+
+                            {% block actions %}
+                            {% endblock actions %}
+                            <li><a href="{% url 'messages_home' %}">Messages</a></li>
+                            <li><a href="{% url 'logout' %}">Logout</a></li>
+
+
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </div>
+
+
+
+</div>
+
+<div class="container-fluid nav_buffer">
+
+    {% block pageContents %}
+
+    <div class="jumbotron text-center">
+        <h2>
+            Welcome, {{  request.user.get_full_name }}
+        </h2>
+    </div>
+
+    <div class="row top_buffer">
+        <div class="col-md-1">
+        </div>
+        <div class="col-md-10">
+            <h2>
+                Hospital News
+            </h2>
+            <p>
+                Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
+            </p>
+            <p>
+                <a class="btn" href="#">View details »</a>
+            </p>
+        </div>
+        <div class="col-md-1">
+        </div>
+    </div>
+    <div class="row top_buffer">
+        <div class="col-md-1">
+        </div>
+        <div class="col-md-10">
+            <h2>
+                Patient Information
+            </h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Qui dicta minus molestiae vel beatae natus eveniet ratione temporibus aperiam harum alias officiis assumenda officia quibusdam deleniti eos cupiditate dolore doloribus!</p>
+            <p>Ad dolore dignissimos asperiores dicta facere optio quod commodi nam tempore recusandae. Rerum sed nulla eum vero expedita ex delectus voluptates rem at neque quos facere sequi unde optio aliquam!</p>
+            <p>Tenetur quod quidem in voluptatem corporis dolorum dicta sit pariatur porro quaerat autem ipsam odit quam beatae tempora quibusdam illum! Modi velit odio nam nulla unde amet odit pariatur at!</p>
+            <p>Consequatur rerum amet fuga expedita sunt et tempora saepe? Iusto nihil explicabo perferendis quos provident delectus ducimus necessitatibus reiciendis optio tempora unde earum doloremque commodi laudantium ad nulla vel odio?</p>
+
+            <p>
+                <a class="btn" href="#">View details »</a>
+            </p>
+        </div>
+        <div class="col-md-1">
+        </div>
+    </div>
+
+
+    {% endblock %}
+</div>
+
+
+{% block mainbody %}
+
+{% endblock mainbody %}
+
+
+</body>
+
+<footer>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+
+
+    {% block footer %}{% endblock %}
+
+</footer>
+</html>

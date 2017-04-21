@@ -1,0 +1,17 @@
+{% extends "core/landing/baselanding.html" %}
+
+{% block title %}Registration Selection{% endblock %}
+
+{% block pageContents %}
+    <div class="row text-center">
+        <div class="col-md-4">
+            <a href="{% url 'nurseregister'  %}" class="btn btn-info" role="button">Create a Nurse</a>
+        </div>
+        <div class="col-md-4">
+            <a href="{% url 'doctorregister'  %}" class="btn btn-info" role="button">Create a Doctor</a>
+        </div>
+        <div class="col-md-4">
+            <a href="{% url 'adminregister'  %}" class="btn btn-info" role="button">Create an Admin</a>
+        </div>
+    </div>
+{% endblock %}

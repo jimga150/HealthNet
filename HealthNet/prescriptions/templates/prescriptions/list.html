@@ -1,0 +1,54 @@
+{% extends 'core/landing/baselanding.html' %}
+
+{% block title %}Prescriptions{% endblock title %}
+
+{% block pageContents %}
+    {% if is_doctor %}
+    <form action="{% url 'new prescription'%}">
+        <input type="submit" value="Fill out new Prescription" />
+    </form>
+    {% endif %}
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                {% if Patients %}
+                    <th>Patients</th>
+                {% elif Prescriptions %}
+                    <th>Prescriptions for {{ Name }}</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <thead>
+            <tr>
+                {% for l in Labels %}
+                    <th>{{ l }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        {% if Patients %}
+            {% for p in Patients %}
+                <tr>
+                    <td><a href="{% url 'list prescriptions for patient' p.0.id %}">{{ p.0 }}</a></td>
+                    <td>{{ p.1 }}</td>
+                </tr>
+            {% endfor %}
+        {% elif Prescriptions %}
+            {% for p in Prescriptions %}
+                <tr>
+                    <td>{{ p.0.doctor }}</td>
+                    <td>{{ p.0.drug }}</td>
+                    <td>{{ p.0.dosage }} {{ p.0.Dose_units }}</td>
+                    <td>{{ p.0.rate }} {{ p.1 }}</td>
+                    {% if Prescriptions and is_doctor%}
+                        <td>
+                            <form action="{% url 'delete prescription' p.0.id %}">
+                                <input type="submit" value="Delete" />
+                            </form>
+                        </td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        {% endif %}
+    </table>
+
+{% endblock pageContents %}

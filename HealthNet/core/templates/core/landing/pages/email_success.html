@@ -1,0 +1,17 @@
+{% extends 'core/landing/Patient.html' %}
+{% load userGroup %}
+
+{% block title %}Success!{% endblock %}
+
+{% block pageContents %}
+
+    <h1>Success!</h1>
+    <p>Email sent to {{ request.user.email }}</p>
+
+    <script>
+        window.setTimeout(function(){
+            window.location.href = {% url 'landing' %};
+        }, 10000);
+    </script>
+
+{% endblock pageContents %}

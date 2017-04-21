@@ -1,0 +1,17 @@
+{% extends "core/landing/Nurse.html" %}
+
+{% block title %} Doctor Landing Page  {% endblock title %}
+
+{% block homePage %}{% url 'doctor' %}{% endblock %}
+
+
+{% block doctorstuff %}
+    <!--<li><a href="{% url 'appointment_home' %}">Make Appointment</a></li> -->
+    <!--<li><a href="">Request a new Test</a></li>
+    <li><a href="{# url 'login' #}">Transfer Patient</a></li>
+    <li><a href="{# url 'login' #}">Discharge a Patient</a></li>
+    <li><a href="{# url 'login' #}">Upload an Image</a></li>
+    <li><a href="{# url 'login' #}">Upload Test results</a></li>
+    <li><a href="{# url 'login' #}">Release Test results for viewing</a></li>
+    <li><a href="{# url 'login' #}">Add or remove Perscriptions</a></li>-->
+{% endblock doctorstuff %}

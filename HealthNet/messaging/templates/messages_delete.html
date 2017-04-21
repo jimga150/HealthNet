@@ -1,0 +1,24 @@
+{% extends "core/landing/baselanding.html" %}
+
+
+{% block title %}Delete Message{% endblock title %}
+{% block header %}<h1>Are you sure you want to delete?</h1>{% endblock header %}
+
+
+{% block pageContents %}
+
+    <h2>Message</h2>
+
+    <p>Recipient: {{ object.recipient }}</p>
+    <p>Date: </p>
+    <p>Subject: {{ object.subject }}</p>
+    <p>Message: {{ object.text }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">I'm sure</button>
+    </form>
+
+    <a href="{% url 'messages_home' %}" class="btn btn-primary">Return</a>
+
+{% endblock pageContents %}

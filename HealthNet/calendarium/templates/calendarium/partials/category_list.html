@@ -1,0 +1,10 @@
+{% load i18n %}
+{% load userGroup %}
+
+<ul>
+    {% for category in categories %}
+    {% if request.user|in_group:"Doctor" or request.user|in_group:"Nurse" %}
+        <li>{% if category == current_category %}<strong>{% endif %}<a href=".?category={{ category.pk }}">{{ category.name }}</a>{% if category == current_category %}</strong>{% endif %}</li>
+    {% endif %}
+    {% endfor %}
+</ul>

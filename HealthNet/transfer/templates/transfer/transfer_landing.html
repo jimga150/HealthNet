@@ -1,0 +1,12 @@
+{% extends 'core/landing/baselanding.html' %}
+{% block title %}Transfer Patient{% endblock title %}
+
+{% block pageContents %}
+
+    <form method="POST" action="{% url 'transfer_create' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ transfer_form.as_p }}
+       <button type="submit" class="btn btn-danger">Transfer</button>
+    </form>
+
+{% endblock pageContents %}

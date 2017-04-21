@@ -1,0 +1,23 @@
+{% extends "core/landing/baselanding.html" %}
+
+
+    {% block title %}Delete Test{% endblock title %}
+    {% block header %}<h1>Are you sure you want to delete?</h1>{% endblock header %}
+
+{% block pageContents %}
+    <h2>Test Result</h2>
+
+    <p>Doctor: {{ object.doctor }}</p>
+    <p>Patient: {{ object.patient }}</p>
+    <p>Date: {{ object.date }}</p>
+    <p>Name: {{ object.name }}</p>
+    <p>Notes: {{ object.notes }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">I'm sure</button>
+    </form>
+
+    <a href="{% url 'results_home' %}" class="btn btn-primary">Return</a>
+
+{% endblock pageContents %}

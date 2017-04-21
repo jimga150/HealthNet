@@ -1,0 +1,14 @@
+{% extends "core/landing/baselanding.html" %}
+
+
+{% block title %}Send Message{% endblock title %}
+
+
+{% block pageContents %}
+
+    <form enctype="multipart/form-data" action="" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+    </form>
+
+{% endblock pageContents %}
