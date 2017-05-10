@@ -1,4 +1,7 @@
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render
+
+from core.views import is_patient, is_doctor
 from .forms import ResultForm
 from .models import Results
 from core.models import Log, Patient
@@ -7,18 +10,40 @@ from django.core.urlresolvers import reverse_lazy
 from django.views.generic.edit import UpdateView, DeleteView
 from django.utils import timezone
 
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 
+def is_doctor_or_patient(user):
+    """
+    Checks if user logged in is of type doctor or patient
+    :param user: user logged in
+    :return: True if user is a doctor or patient
+    """
+    return is_doctor(user) or is_patient(user)
+
+
+@login_required
+@user_passes_test(is_doctor_or_patient)
 def index(request):
+    """
+     displays the main page of the test results system
+    :param request: Self explanatory
+    :return: render containing the html page and all the tests for the user
+    """
 
     results = Results.objects.order_by('date').reverse()
 
-    return render(request, "results_main.html", {'results' : results})
+    return render(request, "results_main.html", {'results': results})
 
 
+@login_required
+@user_passes_test(is_doctor)
 def createResult(request):
-
+    """
+        Creates a Test Result that can be released to a specific patient
+        :param request: Self explanatory
+        :return: render containing the html page and the info needed for the test result
+        """
     if request.method == 'POST':
         results_form = ResultForm(request.POST, request.FILES)
 
@@ -46,7 +71,10 @@ def createResult(request):
     return render(request, 'results_create.html', {'results_form' : results_form})
 
 
-class UpdateTest(LoginRequiredMixin, UpdateView):
+class UpdateTest(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    """
+    Allows for edits to be made to the Test Result
+    """
 
     model = Results
 
@@ -56,8 +84,14 @@ class UpdateTest(LoginRequiredMixin, UpdateView):
 
     success_url = reverse_lazy('results_home')
 
+    def test_func(self):
+        return is_doctor(self.request.user)
 
-class DeleteTest(LoginRequiredMixin, DeleteView):
+
+class DeleteTest(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    """
+    Allows for the test result to be deleted
+    """
 
     model = Results
 
@@ -65,9 +99,22 @@ class DeleteTest(LoginRequiredMixin, DeleteView):
 
     success_url = reverse_lazy('results_home')
 
+    def test_func(self):
+        return is_doctor(self.request.user)
 
-def view_for_patient(request, patient_id):
 
-    results = Results.objects.filter(patient=Patient.objects.get(pk=patient_id)).order_by('date').reverse()
+@login_required
+@user_passes_test(is_patient)
+def view_for_patient(request):
+    """
+    Display specifically for patients as to make sure they can't create tests themselves
+    :param request: Self explanatory
+    :return: render containing the html page and all the tests for the patient
+    """
+
+    patient = Patient.objects.all().get(user=request.user)
+
+    results = Results.objects.all().filter(patient=patient).filter(released=True).order_by('date').reverse()
+    print(str(results))
 
     return render(request, "results_main.html", {'results': results})

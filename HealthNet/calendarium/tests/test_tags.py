@@ -54,4 +54,4 @@ class GetWeekURLTestCase(TestCase):
     def test_tag(self):
         result = get_week_URL(
             timezone.datetime.strptime('2016-02-07', '%Y-%m-%d'))
-        self.assertEqual(result, u'/2016/week/5/')
+        self.assertEqual(result, u'/calendar/2016/week/5/')

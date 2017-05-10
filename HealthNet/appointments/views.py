@@ -2,7 +2,7 @@ import datetime
 
 from core.models import Log
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.urlresolvers import reverse_lazy
 from django.db.models import Q
 from django.http import HttpResponseForbidden
@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.views.generic import DeleteView
 from django.views.generic import UpdateView
 
+from core.views import is_doctor, is_patient, is_admin
 from .forms import AppointmentForm
 from .models import Appointment
 
@@ -21,14 +22,7 @@ def is_doc_or_patient(user):
     :param user: The user to be checked
     :return: True if user is a doctor or a patient
     """
-    if user:
-        count = 0
-        count += user.groups.filter(name='Doctor').count()
-        count += user.groups.filter(name='Patient').count()
-        if count != 0:
-            return True
-
-    return False
+    return is_doctor(user) or is_patient(user)
 
 
 def is_not_admin(user):
@@ -37,11 +31,7 @@ def is_not_admin(user):
     :param user: The user to be checked
     :return: True if user is a doctor or a patient
     """
-    if user:
-        if user.groups.filter(name='Admin').count() != 0:
-            return False
-
-    return True
+    return not is_admin(user)
 
 
 @login_required
@@ -126,7 +116,7 @@ def CreateAppointment(request):
                    'parent': parent})
 
 
-class EditAppointment(LoginRequiredMixin, UpdateView):
+class EditAppointment(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     """
     EditAppointment extends UpdateView, which is the generic class for editing preexisting objects
     This allows for a user to change their appointments
@@ -140,8 +130,11 @@ class EditAppointment(LoginRequiredMixin, UpdateView):
 
     success_url = reverse_lazy('appointment_home')
 
+    def test_func(self):
+        return is_not_admin(self.request.user)
 
-class DeleteAppointment(LoginRequiredMixin, DeleteView):
+
+class DeleteAppointment(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     """
     DeleteAppointment extends DeleteView, which is the generic class for deleting objects
     DeleteAppointment will delete the appointment, and is only visible to doctors and patients
@@ -151,6 +144,9 @@ class DeleteAppointment(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('appointment_home')
 
     template_name = 'appointments/appointmentdelete.html'
+
+    def test_func(self):
+        return is_not_admin(self.request.user)
 
 
 def get_parent(request):

@@ -16,12 +16,24 @@
             {% else %}
 
                 <div class="container">
-                  <form id="user_form" method="post" action="{% url 'register' %}"
+                
+                  <form id="user_form" method="post"
+                    {% if stafftype == "doctor" %}
+                        action="{% url 'doctorregister' %}"
+                    {% elif stafftype == "nurse" %}
+                        action="{% url 'nurseregister' %}"
+                    {% elif stafftpye == "admin" %}
+                        action="{% url 'adminregister' %}"
+                    {% else %}
+                        action="{% url 'staffregister' %}"
+                    {% endif %}
                                 enctype="multipart/form-data">
+
                       {% csrf_token %}
                       {{ user_form.as_p }}
                       {{ other_form.as_p }}
-                      <input type="hidden" name="csrfmiddlewaretoken" value="pHK2CZzBB323BM2Nq7DE2sxnQoBG1jPl" disabled="">
+                      <input type="hidden" name="csrfmiddlewaretoken"
+                             value="pHK2CZzBB323BM2Nq7DE2sxnQoBG1jPl" disabled="">
                       <input type="submit" name = "submit" value="Register" />
                   </form>
                 </div>

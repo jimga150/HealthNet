@@ -1,13 +1,10 @@
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.urlresolvers import reverse_lazy
-from django.db.models import Q
-from django.http import HttpResponse
+from django.contrib.auth.models import User
 from django.shortcuts import render
 from django.utils import timezone
 
 from core.views import is_doctor, is_admin
-from .models import Transfer, Log
+from .models import Log
 from .forms import TransferForm
 
 
@@ -17,10 +14,7 @@ def is_doctor_or_admin(user):
     :param user: user being checked for type
     :return: True if either Doctor or Admin, False otherwise
     """
-    if is_doctor(user) | is_admin(user):
-        return True
-    else:
-        return False
+    return is_doctor(user) or is_admin(user)
 
 
 @login_required
@@ -34,30 +28,40 @@ def transfer_main(request):
 
     transfer_form = TransferForm()
 
-    return render(request, 'transfer/transfer_landing.html',  {'transfer_form' : transfer_form})
+    return render(request, 'transfer/transfer_landing.html',  {'transfer_form': transfer_form})
 
 
-# Create your views here.
+@login_required
+@user_passes_test(is_doctor_or_admin)
 def create(request):
     """
     Creates a Transfer object for logging and performs transfer logic.
     :param request: the request from the transfer form
     :return: confirmation page
     """
-    transfer_form = TransferForm(data=request.POST)
-    transfer = transfer_form.save()
 
-    transfer.patient.preferred_hospital = transfer.newHospital
-    transfer.save()
+    if request.method == 'POST':
+        transfer_form = TransferForm(data=request.POST)
+        if transfer_form.is_valid():
+            transfer_form = TransferForm(data=request.POST)
+            transfer = transfer_form.save()
 
-    transfer_log = Log.objects.create_Log(request.user, transfer.patient.__str__(), timezone.now(), transfer.__str__())
-    transfer_log.save()
+            transfer.patient.hospital = transfer.New_Hospital
+            transfer.patient.save()
 
-    return render(request, 'transfer/transfer_confirmation.html')
+            transfer_log = Log.objects.create_Log(request.user, transfer.patient.__str__(), timezone.now(), transfer.__str__())
+            transfer_log.save()
+            return render(request, 'transfer/transfer_confirmation.html')
+    else:
+        transfer_form = TransferForm
+    # queryset = User.objects.all().exclude(pk=request.user.id)
+    return render(request, 'transfer/transfer_landing.html',  {'transfer_form': transfer_form})
 
 
+@login_required
+@user_passes_test(is_doctor_or_admin)
 def confirmation(request):
     """
     Returns confirmation page.
     """
-    return render(request, 'transfer/transfer_confirmation.html' )
+    return render(request, 'transfer/transfer_confirmation.html')

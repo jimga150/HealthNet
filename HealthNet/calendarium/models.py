@@ -40,11 +40,9 @@ class EventModelManager(models.Manager):
         if start == end:
             end = start + timedelta(minutes=30)
         # retrieving relevant events
-        # TODO currently for events with a rule, I can't properly find out when
-        # the last occurrence of the event ends, or find a way to filter that,
-        # so I'm still fetching **all** events before this period, that have a
-        # end_recurring_period.
-        # For events without a rule, I fetch only the relevant ones.
+        # TODO currently for events with a rule, I can't properly find out when the last occurrence of the event ends,
+        # TODO or find a way to filter that, so I'm still fetching **all** events before this period, that have a
+        # TODO end_recurring_period. For events without a rule, I fetch only the relevant ones.
 
         # Django < 1.6 compatibility
         getQuerySet = (self.get_query_set if hasattr(
@@ -79,10 +77,12 @@ class EventModelMixin(models.Model):
     :description: The description of the event.
 
     """
-    start = models.DateTimeField(verbose_name=_('Start date and time (MM/DD/YYYY HH:MM:SS)'))
+    start = models.DateTimeField(verbose_name=_('Start date and time'),
+                                 help_text='<em>(MM/DD/YYYY HH:MM:SS)</em>')
 
     end = models.DateTimeField(
-        verbose_name=_('End date and time (MM/DD/YYYY HH:MM:SS)'),
+        editable=False,
+        verbose_name=_('End date and time '),
     )
 
     creation_date = models.DateTimeField(
@@ -100,10 +100,8 @@ class EventModelMixin(models.Model):
         return self.title
 
     def save(self, *args, **kwargs):
-        # start should override end if end is set wrong. This auto-corrects
-        # usage errors when creating or updating events.
-        if self.end < self.start:
-            self.end = self.start
+        print()
+        self.end = self.start + timedelta(minutes=30)
         return super(EventModelMixin, self).save(*args, **kwargs)
 
     class Meta:
@@ -127,25 +125,20 @@ class Event(EventModelMixin):
         settings.AUTH_USER_MODEL,
         verbose_name=_('Patient'),
         related_name='events',
-        blank=True, null=True,
+        limit_choices_to={'patient': True},
+        # blank=True, null=True,
     )
 
     category = models.ForeignKey(
         'EventCategory',
         verbose_name=_('Doctor'),
         related_name='events',
-        null=True, blank=True,
+        # null=True, blank=True,
     )
-
-    # rule = models.ForeignKey(
-    #     'Rule',
-    #     verbose_name=_('Rule'),
-    #     blank=True, null=True,
-    # )
-
 
     end_recurring_period = models.NullBooleanField(
         verbose_name=_('Appointment Covered by Insurance?'),
+        editable = False,
         blank=True, null=True,
     )
 
@@ -155,11 +148,6 @@ class Event(EventModelMixin):
 
     )
 
-    # image = FilerImageField(
-    #     verbose_name=_('Image'),
-    #     related_name='calendarium_event_images',
-    #     null=True, blank=True,
-    # )
 
     objects = EventModelManager()
 
@@ -190,24 +178,8 @@ class Event(EventModelMixin):
         # get length of the event
         length = self.end - self.start
 
-        # if self.rule:
-        #     # if the end of the recurring period is before the end arg passed
-        #     # the end of the recurring period should be the new end
-        #     if self.end_recurring_period and end and (
-        #             self.end_recurring_period < end):
-        #         end = self.end_recurring_period
-        #     # making start date generator
-        #     occ_start_gen = self._get_date_gen(
-        #         self.get_rrule_object(),
-        #         start - length, end)
-        #
-        #     # chosing the first item from the generator to initiate
-        #     occ_start = next(occ_start_gen)
-        #     while not end or (end and occ_start <= end):
-        #         occ_end = occ_start + length
-        #         yield self._create_occurrence(occ_start, occ_end)
-        #         occ_start = next(occ_start_gen)
-        # else:
+        end = None
+
             # check if event is in the period
         if (not end or self.start < end) and self.end >= start:
             # making start date generator
@@ -230,6 +202,7 @@ class Event(EventModelMixin):
         """Returns all occurrences from start to end."""
         # get persistent occurrences
         persistent_occurrences = self.occurrences.all()
+        end = None
 
         # setup occ_replacer with p_occs
         occ_replacer = OccurrenceReplacer(persistent_occurrences)
@@ -377,6 +350,7 @@ class Occurrence(EventModelMixin):
         settings.AUTH_USER_MODEL,
         verbose_name=_('Patient'),
         related_name='occurrences',
+        limit_choices_to={'patient': True},
         blank=True, null=True,
     )
 

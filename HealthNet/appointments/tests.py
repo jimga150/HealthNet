@@ -24,7 +24,8 @@ class AppointmentTests(TestCase):
 
         hosp = Hospital(name = 'Hospital 1')
 
-        app = Appointment(patient=pat, doctor=doc, hospital=hosp, appointmentStart='1800-01-01 08:00:00', appointmentNotes='Note!')
+        app = Appointment(patient=pat, doctor=doc, hospital=hosp, appointmentStart='1800-01-01 08:00:00',
+                          appointmentNotes='Note!')
 
         print(app.hospital.name)
 

@@ -1,0 +1,40 @@
+{% extends "core/landing/baselanding.html" %}
+
+{% block title %}View Medical Info{% endblock title %}
+
+{% block pageContents %}
+     <div class="row text-left">
+        <div class="col-md-1">
+        </div>
+        <div class="col-md-10">
+            <h4>
+                Patient: {{ Patient.user.get_full_name }}
+            </h4>
+            <h4>
+                Sex: {{ Patient.sex }}
+            </h4>
+            <h4>
+                Blood Type: {{ Patient.get_blood_type_display }}
+            </h4>
+            <h4>
+                Height: {{ Patient.height }} in
+            </h4>
+            <h4>
+                Weight: {{ Patient.weight }} lbs
+            </h4>
+            <h4>
+                Allergies:
+            </h4>
+            <p>{{ Patient.allergies }}</p>
+            <h4>
+                Medical History:
+            </h4>
+            <p>{{ Patient.medical_history }}</p>
+            {% if is_doctor %}
+            <a href="{% url 'update medical info for' Patient.id %}" class="btn btn-sm btn-info">Edit</a>
+            {% endif %}
+        </div>
+        <div class="col-md-1">
+        </div>
+     </div>
+{% endblock pageContents %}

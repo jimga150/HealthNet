@@ -1,13 +1,25 @@
 {% extends 'core/landing/admin.html' %}
+{% load staticfiles %}
 
 {% block title %}System Statistics{% endblock title %}
 
+{% block scriptheader %}
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <link href="{% static 'css/bootstrap.css' %}" rel="stylesheet" type="text/css"/>
+    <script src="{% static 'js/bootstrap.js' %}"></script>
+
+    {{ form.media}}
+
+{% endblock scriptheader %}
+
 {% block pageContents %}
-    <div id = "top" style = "vertical-align:top; width:100%; height:150px">
+    <div id = "top" style = "vertical-align:top; width:100%; height:200px">
         <div id ="left" style = "float:left; width: 50%;">
             <form method="POST" action="{% url 'statistics' %}">{% csrf_token %}
-                <p>Start date: <input type='date' name='start_date'></p>
-                <p>End date: <input type='date' name='end_date'></p>
+                <!--<p>Start date: <input type='date' name='start_date'></p>
+                <p>End date: <input type='date' name='end_date'></p>-->
+                {{ form.as_p }}
                 <button type="submit">Filter</button>
             </form>
         </div>
@@ -15,7 +27,7 @@
             <p>Showing stats from {{ StartDate }} to {{ EndDate }}</p>
         </div>
     </div>
-    <div id = "container" style = "width:50%">
+    <div id = "container" style = "width:100%">
         <div id ="Users" style = "float:left; width: 50%;">
             <table class="table table-striped table-hover">
 		        <thead>

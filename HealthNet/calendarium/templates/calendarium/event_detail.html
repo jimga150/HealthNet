@@ -15,17 +15,18 @@
         <td>{{ object.end }}</td>
     </tr>
     <tr>
-        <th>{% trans "Category" %}</th>
+        <th>{% trans "Doctor" %}</th>
         <td>{{ object.category }}</td>
-    </tr>
-    <tr>
-        <th>{% trans "Description" %}</th>
-        <td>{{ object.description }}</td>
     </tr>
     <tr>
         <th>{% trans "Patient" %}</th>
         <td>{{ object.created_by }}</td>
     </tr>
+    <tr>
+        <th>{% trans "Description" %}</th>
+        <td>{{ object.description }}</td>
+    </tr>
+
 </table>
 <a href="{% url "calendar_current_month" %}">{% trans "Back" %}</a>
     <a href="{% url "calendar_event_update" pk=object.pk %}">{% trans "Edit" %}</a>

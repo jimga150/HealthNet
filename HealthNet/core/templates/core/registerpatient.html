@@ -1,24 +1,205 @@
-{% extends 'core/main/base.html' %}
+{% extends 'core/main/homepage.html' %}
+{% load staticfiles %}
 
 {% block pageheader %}Register{% endblock %}
 {% block title %}Register{% endblock %}
 
+{% block imports %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <link href="{% static 'css/bootstrap.css' %}" rel="stylesheet" type="text/css"/>
+    <script src="{% static 'js/bootstrap.js' %}"></script>
+
+    {{ patient_form.media}}
+
+{% endblock %}
+
 {% block mainbody %}
 
+<div class="nav_buffer">
+
     {% if registered %}
-
-        <h1>Thank you for registering</h1>
-
+        <div class="container transparent-box nav_buffer text-center">
+            <h1>Thank you for registering</h1>
+        </div>
     {% else %}
-        <div class="container">
-          <form id="user_form" method="post" action="{% url 'register' %}"
-                        enctype="multipart/form-data">
-              {% csrf_token %}
-              {{ user_form.as_p }}
-              {{ patient_form.as_p }}
+        <div class="container transparent-box nav_buffer">
+            <form id="user_form" method="post" action="{% url 'register' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <h1 class="text-center">User Information</h1>
+
+                <div class="form-group row">
+
+                    <div class="col-sm-6">
+                        {{ user_form.username.label_tag }}
+                        {{ user_form.username}}
+                        {{ user_form.username.errors}}
+                    </div>
+                    <div class="col-sm-6">
+                        {{ user_form.password.label_tag }}
+                        {{ user_form.password}}
+                        {{ user_form.password.errors}}
+                    </div>
+
+                </div>
+                <!--<div class="form-group">-->
+                    <!--{# user_form.password.errors#}-->
+                    <!--{# user_form.password.label_tag #}-->
+                    <!--{# user_form.password#}-->
+                <!--</div>-->
+                <div class="form-group">
+                    {{ user_form.email.label_tag }}
+                    {{ user_form.email}}
+                    {{ user_form.email.errors}}
+                </div>
+                <div class="form-group row">
+
+                    <div class="col-sm-6">
+                        {{ user_form.first_name.label_tag }}
+                        {{ user_form.first_name}}
+                        {{ user_form.first_name.errors}}
+                    </div>
+                    <div class="col-sm-6">
+                        {{ user_form.last_name.label_tag }}
+                        {{ user_form.last_name}}
+                        {{ user_form.last_name.errors}}
+                    </div>
+
+                </div>
+
+                <hr>
+
+                <h1 class="text-center">Medical Information</h1>
+                <!--<div class="form-group">-->
+                    <!--{# user_form.first_name.errors#}-->
+                    <!--{# user_form.first_name.label_tag #}-->
+                    <!--{# user_form.first_name#}-->
+                <!--</div>-->
+                <!--<div class="form-group">-->
+                    <!--{# user_form.last_name.errors#}-->
+                    <!--{# user_form.last_name.label_tag #}-->
+                    <!--{# user_form.last_name#}-->
+                <!--</div>-->
+                <div class="form-group row">
+
+                    <div class="col-sm-6">
+                        {{ patient_form.birthday.label_tag }}
+                        {{ patient_form.birthday}}
+                        {{ patient_form.birthday.errors}}
+                    </div>
+                    <div class="col-sm-6">
+                        {{ patient_form.sex.label_tag }}
+                        {{ patient_form.sex}}
+                        {{ patient_form.sex.errors}}
+                    </div>
+
+                </div>
+                <!--<div class="form-group">-->
+                    <!--{# patient_form.birthday.errors#}-->
+                    <!--{# patient_form.birthday.label_tag #}-->
+                    <!--{# patient_form.birthday#}-->
+                <!--</div>-->
+                <!--<div class="form-group">-->
+                    <!--{# patient_form.sex.errors#}-->
+                    <!--{# patient_form.sex.label_tag #}-->
+                    <!--{# patient_form.sex#}-->
+                <!--</div>-->
+                <div class="form-group row">
+
+                    <div class="col-sm-4">
+                        {{ patient_form.blood_type.label_tag }}
+                        {{ patient_form.blood_type}}
+                        {{ patient_form.blood_type.errors}}
+                    </div>
+                    <div class="col-sm-4">
+                        {{ patient_form.height.label_tag }}
+                        {{ patient_form.height}}
+                        {{ patient_form.height.errors}}
+                    </div>
+                    <div class="col-sm-4">
+                        {{ patient_form.weight.label_tag }}
+                        {{ patient_form.weight}}
+                        {{ patient_form.weight.errors}}
+                    </div>
+
+                </div>
+                <!--<div class="form-group">-->
+                    <!--{# patient_form.blood_type.errors#}-->
+                    <!--{# patient_form.blood_type.label_tag #}-->
+                    <!--{# patient_form.blood_type#}-->
+                <!--</div>-->
+                <!--<div class="form-group">-->
+                    <!--{# patient_form.height.errors#}-->
+                    <!--{# patient_form.height.label_tag #}-->
+                    <!--{# patient_form.height#}-->
+                <!--</div>-->
+                <!--<div class="form-group">-->
+                    <!--{# patient_form.weight.errors#}-->
+                    <!--{# patient_form.weight.label_tag #}-->
+                    <!--{# patient_form.weight#}-->
+                <!--</div>-->
+                <!--<div class="form-group">-->
+                    <!--{# patient_form.allergies.label_tag #}-->
+                    <!--{# patient_form.allergies#}-->
+                    <!--{# patient_form.allergies.errors#}-->
+                <!--</div>-->
+                <!---->
+                 <div class="form-group row">
+
+                    <div class="col-sm-6">
+                        {{ patient_form.allergies.label_tag }}
+                        {{ patient_form.allergies}}
+                        {{ patient_form.allergies.errors}}
+                    </div>
+                    <div class="col-sm-6">
+                        {{ patient_form.medical_history.label_tag }}
+                        {{ patient_form.medical_history}}
+                        {{ patient_form.medical_history.errors}}
+                    </div>
+
+                </div>
+                <div class="form-group row">
+
+                    <div class="col-sm-6">
+                        {{ patient_form.insurance_info.label_tag }}
+                        {{ patient_form.insurance_info}}
+                        {{ patient_form.insurance_info.errors}}
+                    </div>
+                    <div class="col-sm-6">
+                        {{ patient_form.preferred_hospital.label_tag }}
+                        {{ patient_form.preferred_hospital}}
+                        {{ patient_form.preferred_hospital.errors}}
+                    </div>
+
+                </div>
+                <!--<div class="form-group">-->
+                    <!--{# patient_form.insurance_info.errors#}-->
+                    <!--{# patient_form.insurance_info.label_tag #}-->
+                    <!--{# patient_form.insurance_info#}-->
+                <!--</div>-->
+                <div class="form-group">
+                    {{ patient_form.emergency_contact.label_tag }}
+                    {{ patient_form.emergency_contact}}
+                    {{ patient_form.emergency_contact.errors}}
+                </div>
+                <!--<div class="form-group">-->
+                    <!--{# patient_form.preferred_hospital.errors#}-->
+                    <!--{# patient_form.preferred_hospital.label_tag #}-->
+                    <!--{# patient_form.preferred_hospital#}-->
+                <!--</div>-->
+                <!--<div class="form-group">-->
+                    <!--{# patient_form.hospital.errors#}-->
+                    <!--{# patient_form.hospital.label_tag #}-->
+                    <!--{# patient_form.hospital#}-->
+                <!--</div>-->
+                <!--{#user_form.as_p #}-->
+              <!--{# patient_form.as_p #}-->
               <input type="hidden" name="csrfmiddlewaretoken" value="pHK2CZzBB323BM2Nq7DE2sxnQoBG1jPl" disabled="">
               <input type="submit" name = "submit" value="Register" />
           </form>
         </div>
+
+</div>
+
     {% endif %}
 {% endblock %}

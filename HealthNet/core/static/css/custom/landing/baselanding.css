@@ -9,3 +9,19 @@
 .nav_buffer {
     padding-top: 70px;
 }
+
+.container-table {
+    display: table;
+}
+.vertical-center-row {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.margin-base-vertical {
+    margin: 40px 0;
+    font-size: 500%;
+    /*color: whitesmoke;*/
+    border-radius: 25px;
+    padding: 20px;
+}

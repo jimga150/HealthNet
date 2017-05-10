@@ -2,11 +2,18 @@
 
 {% block pageContents %}
     <h4>This page assumes that the patient has already created an account using the same email as the one in your export
-        file.</h4>
+        file. The email in the file uploaded MUST match the email of the patient you are editing.</h4>
     <form id="upload_file" method="post" action="{% url 'upload patient' %}" enctype=multipart/form-data>
         {% csrf_token %}
         {{ form.as_p }}
         <input type="submit" name="upload" value="Upload"/>
     </form>
+    {% if attempted %}
+        {% if upload_success %}
+            <h4>Upload successful!</h4>
+        {% else %}
+            <h4 style="color:#c9302c;">Upload failed.</h4>
+        {% endif %}
+    {% endif %}
 
 {% endblock pageContents %}

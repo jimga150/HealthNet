@@ -321,12 +321,6 @@ class OccurrenceViewMixin(object):
     def get_success_url(self):
 
         return reverse('calendar_current_month')
-        # return reverse('calendar_occurrence_update', kwargs={
-        #     'pk': self.object.event.pk,
-        #     'year': self.object.start.year,
-        #     'month': self.object.start.month,
-        #     'day': self.object.start.day,
-        # })
 
 
 class OccurrenceDeleteView(OccurrenceViewMixin, DeleteView):

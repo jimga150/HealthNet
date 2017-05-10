@@ -20,24 +20,38 @@
                 <td>{{ p.user.get_full_name }}</td>
                 <td>{{ p.user.email }}</td>
                 <td>{{ p.birthday }}</td>
-                {% if request.user|in_group:"Doctor" %}
+                <td>{{ p.hospital }}</td>
+                <td>{{ p.admitted}}</td>
+                {% if request.user|in_group:"Doctor" or request.user|in_group:"Nurse"%}
                     <td>
-                        <form action="{% url 'update medical info for' p.id %}">
-                            <input type="submit" value="Update Medical Info" />
-                        </form>
+                        <a href="{% url 'view medical info for' p.id %}" class='btn btn-primary'>View Medical Info</a>
                     </td>
                     <td>
-                        <form action="{% url 'view test results for patient' p.id %}">
-                            <input type="submit" value="View Test Results" />
-                        </form>
+                        <a href="{% url 'list prescriptions for patient' p.id %}"
+                           class='btn btn-primary'>View Prescriptions</a>
+                    </td>
+                {% elif request.user|in_group:"Doctor" %}
+                    <td>
+                        <a href="{% url 'view test results for patient' %}"
+                           class='btn btn-primary'>View Test Results</a>
                     </td>
                 {% endif %}
-                <td>
-                    <form action="{% url 'list prescriptions for patient' p.id %}">
-                        <input type="submit" value="View Prescriptions" />
-                    </form>
-                </td>
 
+                {% if p.admitted and request.user|in_group:"Doctor"%}
+                    <td>
+                    <a href="{% url 'admit patients' p.id %}" class='btn btn-primary'>Dismiss Patient</a>
+                </td>
+                {% elif not p.admitted and not request.user|in_group:"Admin" %}
+                    <td>
+                    <a href="{% url 'admit patients' p.id %}" class='btn btn-primary'>Admit Patient</a>
+                </td>
+                {% endif %}
+
+                {% if request.user|in_group:"Admin"%}
+                    <td>
+                        <a href="{% url 'transfer_landing' %}" class='btn btn-primary'>Transfer Patient</a>
+                    </td>
+                {% endif %}
             </tr>
         {% endfor %}
     </table>

@@ -19,7 +19,7 @@ class CalendariumRedirectViewTestCase(ViewRequestFactoryTestMixin, TestCase):
 
     def test_view(self):
         resp = self.client.get(self.get_url())
-        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(resp.status_code, 200)
 
 
 class MonthViewTestCase(ViewRequestFactoryTestMixin, TestCase):
@@ -169,49 +169,7 @@ class OccurrenceViewTestCaseMixin(object):
         self.event = mixer.blend(
             'calendarium.Event', created_by=mixer.blend('auth.User'),
             start=now() - timedelta(days=1), end=now() + timedelta(days=5),
-            rule=self.rule, end_recurring_period=now() + timedelta(days=2))
-
-
-class OccurrenceDeleteViewTestCase(
-        OccurrenceViewTestCaseMixin, ViewRequestFactoryTestMixin, TestCase):
-    """Tests for the ``OccurrenceDeleteView`` view class."""
-    view_class = views.OccurrenceDeleteView
-
-    def test_deletion(self):
-        self.is_not_callable(kwargs={
-            'pk': 5,
-            'year': self.event.start.date().year,
-            'month': self.event.start.date().month,
-            'day': self.event.start.date().day,
-        }, user=self.event.created_by, msg=('Wrong event pk.'))
-
-        self.is_not_callable(kwargs={
-            'pk': self.event.pk,
-            'year': self.event.start.date().year,
-            'month': '999',
-            'day': self.event.start.date().day,
-        }, user=self.event.created_by, msg=('Wrong dates.'))
-
-        new_rule = mixer.blend('calendarium.Rule', name='weekly',
-                               frequency='WEEKLY')
-        new_event = mixer.blend(
-            'calendarium.Event',
-            rule=new_rule,
-            end_recurring_period=now() + timedelta(days=200),
-            start=now() - timedelta(hours=5),
-        )
-        test_date = self.event.start.date() - timedelta(days=5)
-        self.is_not_callable(kwargs={
-            'pk': new_event.pk,
-            'year': test_date.year,
-            'month': test_date.month,
-            'day': test_date.day,
-        }, user=self.event.created_by, msg=(
-            'No occurrence available for this day.'))
-
-        self.is_callable(user=self.event.created_by)
-        self.is_postable(user=self.event.created_by, to='/',
-                         data={'decision': 'this one'})
+            rule=self.rule)
 
 
 class OccurrenceDetailViewTestCase(

@@ -4,7 +4,9 @@ from core.models import Patient
 
 
 class ResultForm(forms.ModelForm):
-
+    """
+    Form that displays and gets the information from the user for the test result
+    """
     patient = forms.ModelChoiceField(queryset=Patient.objects.all(), required=True)
     name = forms.CharField(max_length=100, required=True)
     files = forms.FileField(

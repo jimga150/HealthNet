@@ -10,11 +10,11 @@ class Transfer(models.Model):
     newHospital - Hospital to move Patient to. (update Patient.hospital)
     patient - Patient to be modified.
     """
-    newHospital = models.ForeignKey(Hospital)
+    New_Hospital = models.ForeignKey(Hospital)
     patient = models.ForeignKey(Patient)
 
     def __str__(self):
-        return self.patient.__str__() + " was transferred to " + self.newHospital.__str__()
+        return self.patient.__str__() + " was transferred to " + self.New_Hospital.__str__()
 
 
 

@@ -41,7 +41,8 @@ def new_prescription(request):
 
         prescription_form = PrescriptionForm(data=request.POST)
 
-        if prescription_form.is_valid():
+        validity = prescription_form.is_valid()
+        if validity:
 
             prescription = prescription_form.save(commit=False)
             prescription.date_prescribed = timezone.now()
@@ -54,7 +55,7 @@ def new_prescription(request):
         else:
             print("Error")
             print(prescription_form.errors)
-        if 'submit_singular' in request.POST:
+        if 'submit_singular' in request.POST and validity:
             return redirect('prescriptions')
         elif 'submit_another' in request.POST:
             prescription_form = PrescriptionForm()

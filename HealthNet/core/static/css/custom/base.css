@@ -1,0 +1,25 @@
+body {
+     background: url("../../img/healthnet.jpg") no-repeat right bottom;
+}
+
+html, body { min-height: 100%; }
+
+
+.text-vertical-center {
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.header {
+    display: table;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: whitesmoke;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    background-size: cover;
+    -o-background-size: cover;
+}
+

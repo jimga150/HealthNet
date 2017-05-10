@@ -1,0 +1,83 @@
+
+ html, body, .container-table {
+    height: 100%;
+}
+
+ body {
+     padding-top: 65px;
+ }
+
+body {
+    background: url("../../img/hospital.jpg") no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+
+.margin-base-vertical {
+    margin: 40px 0;
+    font-size: 500%;
+    /*color: whitesmoke;*/
+    border-radius: 25px;
+    padding: 20px;
+}
+
+li {
+    color:red;
+}
+
+.transparent {
+
+    /*background-color: rgba(234, 234, 234, 0.6);*/
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+}
+
+.panel {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+.nav_buffer {
+    padding-top: 70px;
+    padding-bottom: 30px;
+}
+
+.transparent-box {
+    background-color: rgba(164, 164, 164, 0.5);
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.transparent-box h2 {
+    color: black;
+}
+
+.dark-button {
+  color: #ffffff;
+  background-color: rgb(44, 44, 44);
+  border-color: #130269;
+}
+
+label {
+    color: black;
+}
+
+.vertical-center {
+
+  display: inline-block;
+    vertical-align: middle;
+    float: none;
+}
+
+.container-table {
+    display: table;
+}
+.vertical-center-row {
+    display: table-cell;
+    vertical-align: middle;
+}

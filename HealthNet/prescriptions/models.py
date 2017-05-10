@@ -47,6 +47,9 @@ class Prescription(models.Model):
         :return: Saved Prescription
         """
         words = Prescription_string.split(" ")
+        if len(words) != 11:
+            print("Cannot make prescription from String [" + Prescription_string + "]")
+            return None
         patient = Patient.objects.get(pk=patient_id)
         rate = int(words[2])
         dosage = float(words[5])
@@ -65,5 +68,7 @@ class Prescription(models.Model):
             if t[1] == Time_units_verbose:
                 Time_units = t[0]
 
-        return cls(patient=patient, doctor=Doctor.objects.get(user=doctor_user), date_prescribed=timezone.now(),
-                   drug=drug, dosage=dosage, Dose_units=Dose_units, rate=rate, Time_units=Time_units).save()
+        tosave =  cls(patient=patient, doctor=Doctor.objects.get(user=doctor_user), date_prescribed=timezone.now(),
+                   drug=drug, dosage=dosage, Dose_units=Dose_units, rate=rate, Time_units=Time_units)
+        tosave.save()
+        return tosave

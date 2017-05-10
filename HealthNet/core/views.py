@@ -3,12 +3,11 @@ from io import TextIOWrapper
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.contrib.auth.models import Group
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.template import RequestContext
-from django.views.generic import UpdateView
+from django.views.generic import UpdateView, CreateView, DetailView
 
 from prescriptions.models import Prescription
 from .forms import *
@@ -50,10 +49,20 @@ def is_nurse(user):
 
 def is_doctor_or_nurse(user):
     """
+    Uses above functions combined to fit the @user_passes_test mixin
     :param user: The User in question
     :return: True if the user is a Doctor or Nurse
     """
     return is_doctor(user) or is_nurse(user)
+
+
+def not_patient(user):
+    """
+    Users is_patient funtion to test if user is of patient type
+    :param user: The User in question
+    :return: True if user is not a patient
+    """
+    return not is_patient(user)
 
 
 def is_admin(user):
@@ -90,15 +99,7 @@ def user_login(request):
                 # Register Log
                 log = Log.objects.create_Log(user, user.username, timezone.now(), user.username + " logged in")
                 log.save()
-                #
-                # if request.user.groups.filter(name='Patient').exists():
-                #     return HttpResponseRedirect(reverse('patient'))
-                # elif request.user.groups.filter(name='Doctor').exists():
-                #     return HttpResponseRedirect(reverse('doctor'))
-                # elif request.user.groups.filter(name='Nurse').exists():
-                #     return HttpResponseRedirect(reverse('nurse'))
-                # elif request.user.groups.filter(name='Admin').exists():
-                #     return HttpResponseRedirect(reverse('admin'))
+
                 return HttpResponseRedirect(reverse('landing'))
 
             else:
@@ -158,6 +159,11 @@ def profile(request):
 
 
 def QueryListtoString(query):
+    """
+    Used to convert Query lists to readable strings, used in the following Medical Information Export function.
+    :param query: the query to convert
+    :return: the readable string
+    """
     ans = ""
     for q in query.iterator():
         ans = ans + str(q) + '\n'
@@ -182,32 +188,36 @@ def MediInfoExport(Patient_exporting: Patient, assoc_user: User, is_email):
 
     Allergies = 'Allergies: \r\n' + str(Patient_exporting.allergies)
 
+    Medical_History = 'Medical-History: \r\n' + str(Patient_exporting.medical_history)
+
     Prescriptions = 'Prescriptions: \r\n' + \
                     str(QueryListtoString(Prescription.objects.all().filter(patient=Patient_exporting)))
 
     Insurance_Info = 'Insurance-Info: ' + str(Patient_exporting.insurance_info)
     Preferred_Hospital = 'Preferred-Hospital: ' + str(Patient_exporting.preferred_hospital)
-    PHospital = 'Current Hospital: ' + str(Patient_exporting.hospital)
+    PHospital = 'Current-Hospital: ' + str(Patient_exporting.hospital)
     Emergency_Contact = 'Emergency-Contact: ' + str(Patient_exporting.emergency_contact)
 
     ans = Name + '\r\n' + \
-        Email + '\r\n' + \
-        Birthday + '\r\n' + \
-        Gender + '\r\n' + \
-        Blood_Type + '\r\n' + \
-        Height + '\r\n' + \
-        Weight + '\r\n\r\n' + \
-        Allergies + '\r\n\r\n' + \
-        Prescriptions + '\r\n\r\n' + \
-        Insurance_Info + '\r\n' + \
-        Preferred_Hospital + '\r\n' + \
-        PHospital + '\r\n' + \
-        Emergency_Contact + '\r\n'
+          Email + '\r\n' + \
+          Birthday + '\r\n' + \
+          Gender + '\r\n' + \
+          Blood_Type + '\r\n' + \
+          Height + '\r\n' + \
+          Weight + '\r\n\r\n' + \
+          Allergies + '\r\n\r\n' + \
+          Medical_History + '\r\n\r\n' + \
+          Prescriptions + '\r\n\r\n' + \
+          Insurance_Info + '\r\n' + \
+          Preferred_Hospital + '\r\n' + \
+          PHospital + '\r\n' + \
+          Emergency_Contact + '\r\n'
 
     if is_email:
         return 'Hello ' + str(assoc_user.first_name) + \
-               ', \n\n\tYou are receiving this email as an export of your medical information from ' + PHospital + \
-               '. Below you\'ll find the medical record export. Thank you for using HealthNet!\n\n' + ans
+               ', \n\n\tYou are receiving this email as an export of your medical information from ' + \
+               str(Patient_exporting.hospital) + '. Below you\'ll find the medical record export. ' \
+                                                 'Thank you for using HealthNet!\n\n' + ans
     return ans
 
 
@@ -222,13 +232,14 @@ def email(request):
     """
     Pat = Patient.objects.all().get(user=request.user)
 
-    request.user.email_user(
-        'Medical Information Export: ' + request.user.get_full_name(),
-        MediInfoExport(Pat, request.user, True),
-        'DjangoTeam4Bot@gmail.com',
-        fail_silently=True,
-    )
-    return render(request, 'core/landing/pages/email_success.html')
+    if request.user.email_user('Medical Information Export: ' + request.user.get_full_name(),
+                               MediInfoExport(Pat, request.user, True),
+                               'DjangoTeam4Bot@gmail.com',
+                               fail_silently=True,
+                               ):
+        return render(request, 'core/landing/pages/email_success.html')
+    else:
+        return render(request, 'core/landing/pages/profile.html', {'parent': get_parent(request)})
 
 
 @login_required
@@ -249,6 +260,18 @@ def download(request):
     return response
 
 
+def listtostring(listin):
+    """
+    Converts a simple list into a space separated sentence, effectively reversing str.split(" ")
+    :param listin: the list to convert
+    :return: the readable string
+    """
+    ans = ""
+    for l in listin:
+        ans = ans + str(l) + " "
+    return ans.strip()
+
+
 def read_new_Patient(filename, encoding, doctor_user):
     """
     Reads in a new Patient from the specific file, assumes that the patient instance already exists and is associated
@@ -264,12 +287,15 @@ def read_new_Patient(filename, encoding, doctor_user):
     new_patient = None
     Allergies_mode = False
     Prescriptions_mode = False
+    Medical_History_mode = False
     Allergies = ''
+    Medical_History = ''
     Prescriptions = []
 
     for line in file.readlines():
-        # print("Line: " + line)
+        print("Line: " + line)
         words = line.strip().split(" ")
+        print(words)
         instance_var = words[0]
         # print("Current variable is " + instance_var)
         if Allergies_mode:
@@ -280,6 +306,14 @@ def read_new_Patient(filename, encoding, doctor_user):
                 # print('And that\'s it for allergies')
                 Allergies_mode = False
                 new_patient.allergies = Allergies
+        elif Medical_History_mode:
+            if line.strip() != '':
+                # print('found medical history: ' + line.strip())
+                Medical_History = Medical_History + line.strip()
+            else:
+                # print('And that\'s it for medical history')
+                Medical_History_mode = False
+                new_patient.medical_history = Medical_History
         elif Prescriptions_mode:
             if line.strip() != '':
                 # print('found prescription: ' + line.strip())
@@ -291,53 +325,75 @@ def read_new_Patient(filename, encoding, doctor_user):
                     Prescription.fromString(p, new_patient.id, doctor_user)
         if instance_var == 'Email:':
             Email = words[1]
-            # print("found email: " + Email)
+            print("found email: " + Email)
             user = User.objects.get(email=Email)
             new_patient = Patient.objects.get(user=user)
-            # print(new_patient)
+            print(new_patient)
         elif instance_var == 'Birthday:':
-            # print("found b-day: " + words[1])
+            print("found b-day: " + words[1])
             new_patient.birthday = words[1]
         elif instance_var == 'Sex:':
-            # print("found sex: " + words[1])
+            print("found sex: " + words[1])
             new_patient.sex = words[1]
         elif instance_var == 'Blood-Type:':
-            # print("found b-type: " + words[1])
+            print("found b-type: " + words[1])
             new_patient.blood_type = words[1]
         elif instance_var == 'Height:':
-            # print("found height: " + words[1])
+            print("found height: " + words[1])
             new_patient.height = words[1]
         elif instance_var == 'Weight:':
-            # print("found weight: " + words[1])
+            print("found weight: " + words[1])
             new_patient.weight = words[1]
         elif instance_var == 'Allergies:':
-            # print("found Allergies")
+            print("found Allergies")
             Allergies_mode = True
+        elif instance_var == 'Medical-History::':
+            print("found Medical History")
+            Medical_History_mode = True
         elif instance_var == 'Prescriptions:':
-            # print("found prescriptions")
+            print("found prescriptions")
             Prescriptions_mode = True
         elif instance_var == 'Insurance-Info:':
-            # print("found Insurance: " + words[1])
-            new_patient.insurance_info = words[1]
+            insurance = listtostring(words[1:])
+            print("found Insurance: " + insurance)
+            new_patient.insurance_info = insurance
         elif instance_var == 'Preferred-Hospital:':
-            # print("found hospital: " + words[1])
-            new_patient.preferred_hospital = Hospital.objects.get(name=words[1])
+            p_hospital = listtostring(words[1:])
+            print("found hospital: " + p_hospital)
+            new_patient.preferred_hospital = Hospital.objects.get(name=p_hospital)
         elif instance_var == 'Emergency-Contact:':
-            # print("found e-contact: " + words[1])
+            print("found e-contact: " + words[1])
             new_patient.emergency_contact = words[1]
+            # elif instance_var == 'Current-Hospital:':
+            #     c_hospital = listtostring(words[1:])
+            #     print("found hospital: " + c_hospital)
+            #     new_patient.hospital = Hospital.objects.get(name=c_hospital)
     return new_patient.save()
 
 
 @login_required
 @user_passes_test(is_doctor_or_nurse)
 def upload_patient_info(request):
+    """
+    View for uploading a text file with pateint information
+    :param request: request with possible file upload
+    :return: the current page again with possible confirmation
+    """
+    uploaded = False
+
     if request.method == 'POST':
+        attempted = True
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             read_new_Patient(request.FILES['file'], request.encoding, request.user)
+            uploaded = True
+        else:
+            uploaded = False
     else:
+        attempted = False
         form = UploadFileForm()
-    return render(request, 'core/upload_patient.html', {'form': form})
+    return render(request, 'core/upload_patient.html', {'form': form, 'attempted': attempted,
+                                                        'upload_success': uploaded})
 
 
 @login_required
@@ -379,6 +435,11 @@ def admin_landing(request):
 @login_required
 @user_passes_test(is_admin)
 def registerStaff(request):
+    """
+    Renders the registration selection page
+    :param request: The request with user information
+    :return: The page to be rendered
+    """
     return render(request, 'core/landing/pages/registration_select.html')
 
 
@@ -412,6 +473,7 @@ def register_nurse_page(request):
             user.save()
 
             nprofile = other_form.save(commit=False)
+            nprofile.user = user
             nprofile.save()
 
             # Register Log
@@ -420,16 +482,16 @@ def register_nurse_page(request):
 
             registered = True
 
-        else:
-            print("Error")
-            print(user_form.errors, other_form.errors)
+            # else:
+            # print("Error")
+            # print(user_form.errors, other_form.errors)
 
     else:
         user_form = UserRegForm()
         other_form = NurseRegForm()
 
     return render(request, "core/landing/pages/registrationPages/staff_registration.html",
-                  {'user_form': user_form, 'other_form': other_form, 'registered': registered})
+                  {'user_form': user_form, 'other_form': other_form, 'registered': registered, 'stafftype': "nurse"})
 
 
 @login_required
@@ -462,6 +524,7 @@ def register_doctor_page(request):
             user.save()
 
             dprofile = other_form.save(commit=False)
+            dprofile.user = user
             dprofile.save()
 
             # Register Log
@@ -470,16 +533,16 @@ def register_doctor_page(request):
 
             registered = True
 
-        else:
-            print("Error")
-            print(user_form.errors, other_form.errors)
+            # else:
+            # print("Error")
+            # print(user_form.errors, other_form.errors)
 
     else:
         user_form = UserRegForm()
         other_form = DoctorRegForm()
 
     return render(request, "core/landing/pages/registrationPages/staff_registration.html",
-                  {'user_form': user_form, 'other_form': other_form, 'registered': registered})
+                  {'user_form': user_form, 'other_form': other_form, 'registered': registered, 'stafftype': "doctor"})
 
 
 @login_required
@@ -499,7 +562,7 @@ def register_admin_page(request):
 
         if user_form.is_valid():
 
-            group = Group.objects.get(name='Doctor')
+            group = Group.objects.get(name='Admin')
 
             user = user_form.save()
             if User.objects.all().filter(email=user.email).count() > 0:
@@ -510,7 +573,7 @@ def register_admin_page(request):
 
             user.save()
 
-            sadmin = Admin(user=user)
+            sadmin = Admin.objects.create(user=user)
             sadmin.save()
 
             # Register Log
@@ -519,15 +582,15 @@ def register_admin_page(request):
 
             registered = True
 
-        else:
-            print("Error")
-            print(user_form.errors)
+            # else:
+            #     print("Error")
+            #     print(user_form.errors)
 
     else:
         user_form = UserRegForm()
 
     return render(request, "core/landing/pages/registrationPages/admin_registration.html",
-                  {'user_form': user_form, 'registered': registered})
+                  {'user_form': user_form, 'registered': registered, 'stafftype': "admin"})
 
 
 @login_required
@@ -538,7 +601,13 @@ def landing(request):
     :param request: The request with user information
     :return: The page to be rendered
     """
-    return render(request, 'core/landing/baselanding.html')
+    context = {}
+    parent = get_parent(request)
+    if 'Patient' in parent:
+        context['Patient_ID'] = Patient.objects.all().get(user=request.user).id
+        print("Patient! id is " + str(context['Patient_ID']))
+
+    return render(request, 'core/landing/baselanding.html', context)
 
 
 def register_patient_page(request):
@@ -571,6 +640,9 @@ def register_patient_page(request):
             pprofile.user = user
             if User.objects.filter(email=pprofile.emergency_contact).exists():
                 pprofile.emergency_contact_user = User.objects.get(email=pprofile.emergency_contact)
+
+            pprofile.hospital = pprofile.preferred_hospital
+
             pprofile.save()
 
             # Register Log
@@ -600,7 +672,8 @@ def main(request):
     :param request: The request with user information
     :return: The page to be rendered
     """
-    return render(request, 'core/main/base.html')
+    # return render(request, 'core/main/base.html')
+    return render(request, 'core/main/homepage.html')
 
 
 @login_required
@@ -611,46 +684,75 @@ def patient_tests(request):
     :param request: The request with user information
     :return: The page to be rendered
     """
-    return render(request, 'core/landing/pages/testResults.html')
+    return redirect(reverse('results_home'))
 
 
 @login_required
-@user_passes_test(is_patient)
-def editownpatientprofile(request):
+def editownprofile(request):
     """
-    Allows patient to update their profile information, plus certain User info
+    Allows user to update their profile information, plus certain User info
     :param request: The request with possible form info
     :return: The Edit page
     """
-    patient = Patient.objects.get(user=request.user)
+    parent = get_parent(request)
+
+    person = None
+
+    if 'Patient' in parent:
+        person = Patient.objects.get(user=request.user)
+    elif 'Doctor' in parent:
+        person = Doctor.objects.get(user=request.user)
+    elif 'Nurse' in parent:
+        person = Nurse.objects.get(user=request.user)
 
     if request.method == 'POST':
         user_form = UserUpdateForm(data=request.POST, instance=request.user)
-        patient_form = PatientRegForm(data=request.POST, instance=patient)
 
-        if user_form.is_valid() and patient_form.is_valid():
+        person_form = None
+        if 'Patient' in parent:
+            person_form = PatientForm(data=request.POST, instance=person)
+        elif 'Doctor' in parent:
+            person_form = DoctorRegForm(data=request.POST, instance=person)
+        elif 'Nurse' in parent:
+            person_form = NurseRegForm(data=request.POST, instance=person)
+
+        if user_form.is_valid():
 
             user = user_form.save()
 
-            pprofile = patient_form.save(commit=False)
-            pprofile.user = user
-            if User.objects.filter(email=pprofile.emergency_contact).exists():
-                pprofile.emergency_contact_user = User.objects.get(email=pprofile.emergency_contact)
-            pprofile.save()
+            if person_form is not None and person_form.is_valid():
+                pprofile = person_form.save(commit=False)
+                pprofile.user = user
 
-            log = Log.objects.create_Log(pprofile.user, pprofile.user.username, timezone.now(),
-                                         "Patient updated own info")
+                if person is Patient and User.objects.filter(email=pprofile.emergency_contact).exists():
+                    pprofile.emergency_contact_user = User.objects.get(email=pprofile.emergency_contact)
+
+                pprofile.save()
+
+            log = Log.objects.create_Log(request.user, request.user.username, timezone.now(),
+                                         "User updated own info")
             log.save()
 
         else:
-            print("Error")
-            print(user_form.errors, patient_form.errors)
+            # print("Error")
+            # print(user_form.errors, person_form.errors)
+            pass
+
+        return render(request, 'core/landing/pages/profile.html', {'parent': parent})
+
     else:
         user_form = UserUpdateForm(instance=request.user)
-        patient_form = PatientRegForm(instance=patient)
 
-    return render(request, 'core/landing/pages/edit_profile.html',
-                  {'user_form': user_form, 'patient_form': patient_form})
+        person_form = None
+        if 'Patient' in parent:
+            person_form = PatientForm(instance=person)
+        elif 'Doctor' in parent:
+            person_form = DoctorRegForm(instance=person)
+        elif 'Nurse' in parent:
+            person_form = NurseRegForm(instance=person)
+
+        return render(request, 'core/landing/pages/edit_profile.html',
+                      {'user_form': user_form, 'patient_form': person_form})
 
 
 class EditPatientMediInfo(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -669,7 +771,7 @@ class EditPatientMediInfo(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         p_id = self.kwargs['patient_id']
         patient = Patient.objects.get(pk=p_id)
         log = Log.objects.create_Log(self.request.user, self.request.user.username, timezone.now(), "Patient(\"" +
-                                     patient.user.get_full_name() + "\", id " + p_id + ") Medical Info viewed/updated")
+                                     patient.user.get_full_name() + "\", id " + p_id + ") Medical Info updated")
         log.save()
         return patient
 
@@ -678,9 +780,14 @@ class EditPatientMediInfo(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
 
 @login_required
-@user_passes_test(is_doctor_or_nurse)
+@user_passes_test(not_patient)
 def view_patients(request):
-    labels = ["Name", "Email", "Birthday"]
+    """
+    Simple view for fetching all the patients in the system onto a list and viewing them by name
+    :param request: The request
+    :return: rendered list page with patient context
+    """
+    labels = ["Name", "Email", "Birthday", "Hospital", "Admission Status"]
 
     context = {"Patients": Patient.objects.all(), "Labels": labels}
     return render(request, 'core/view_patients.html', context)
@@ -719,3 +826,72 @@ def get_parent(request):
 
     return parent
 
+
+def swag(request):
+    return render(request, 'core/landing/pages/registrationPages/swag.html')
+
+
+@login_required
+@user_passes_test(is_doctor_or_nurse)
+def admitPatient(request, patient_id):
+    """
+    Allows Doctors and Nurses to admnit existing Patients
+    :param request: self explanatory
+    :param patient_id: ID number of the Patient to admit
+    :return: view_patients list, after Patient has been admitted
+    """
+    patient = Patient.objects.get(pk=patient_id)
+
+    if patient.admitted:
+        patient.admitted = False
+    else:
+        patient.admitted = True
+
+    patient.save()
+    labels = ["Name", "Email", "Birthday", "Hospital", "Admission Status"]
+    context = {"Patients": Patient.objects.all(), "Labels": labels}
+
+    return render(request, 'core/view_patients.html', context)
+
+
+class NewHospital(CreateView, UserPassesTestMixin, LoginRequiredMixin):
+    """
+    View class for Hospital admins to make new hospital instances.
+    """
+    model = Hospital
+
+    template_name = 'core/new_hospital.html'
+
+    form_class = NewHospitalForm
+
+    success_url = reverse_lazy('landing')
+
+    def test_func(self):
+        return is_admin(self.request.user)
+
+
+class ViewPatientMediInfo(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+    """
+    Viewer for patient Medical Info by nurses or Doctors
+    """
+    model = Patient
+
+    template_name = 'core/view_medi_info.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(ViewPatientMediInfo, self).get_context_data(**kwargs)
+        p_id = self.kwargs['patient_id']
+        context['Patient'] = Patient.objects.get(pk=p_id)
+        context['is_doctor'] = is_doctor(self.request.user)
+        return context
+
+    def get_object(self, queryset=None):
+        p_id = self.kwargs['patient_id']
+        patient = Patient.objects.get(pk=p_id)
+        log = Log.objects.create_Log(self.request.user, self.request.user.username, timezone.now(), "Patient(\"" +
+                                     patient.user.get_full_name() + "\", id " + p_id + ") Medical Info viewed")
+        log.save()
+        return patient
+
+    def test_func(self):
+        return is_doctor_or_nurse(self.request.user)
