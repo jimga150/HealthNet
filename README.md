@@ -39,6 +39,7 @@ macOS/Linux: run
 - Access website with new account
 
 Doctors
+
 	User: doctor1
 	pass: P@ssword
 	
@@ -46,10 +47,12 @@ Doctors
 	pass: P@ssword
 
 Patients
+
 	User: patient1
 	pass: P@ssword
 
 Nurses
+
 	User: nurse1
 	pass: P@ssword
 
@@ -57,6 +60,7 @@ Nurses
 	pass: P@ssword
 
 HAdmins
+
 	User: admin1
 	pass: P@ssword
 
